@@ -1,4 +1,4 @@
-package com.gossip.server;
+package com.gossip.client;
 
 
 import org.springframework.context.annotation.Bean;
@@ -20,7 +20,7 @@ public class SwaggerConfig {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("GOSSIP")
-                .description("GOSSIP SERVER")
+                .description("GOSSIP CLIENT")
                 .license(null)
                 .licenseUrl(null)
                 .termsOfServiceUrl("")

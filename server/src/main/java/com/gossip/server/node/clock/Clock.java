@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @RequiredArgsConstructor
 @Getter
-class Clock {
+public class Clock {
 
     private  final Integer idPeer;
     private final AtomicInteger version;

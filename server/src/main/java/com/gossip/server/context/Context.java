@@ -17,10 +17,10 @@ public interface Context {
     List<Peer> getPeers();
     Peer getPeer(Integer id);
 
+    Integer getStorageSize();
+
     List<Clock> getClock();
 
     void cancelIfNotActive();
-
-    Integer getStorageSize();
 
 }
