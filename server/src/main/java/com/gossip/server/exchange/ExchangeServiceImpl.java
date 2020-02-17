@@ -60,8 +60,7 @@ class ExchangeServiceImpl implements ExchangeService {
                                                                               ResponseGossipPullDTO.class,
                                                                               params,
                                                                               "gossip");
-                return Optional.ofNullable(response.getBody()).
-                        orElse(null);
+                return Optional.ofNullable(response.getBody()).orElse(null);
             } catch (HttpException e) {
                 log.error("Peer #{} pull request error for {}. Response status code {}", attributes.getId(),
                           idPeer, e.getStatusCode());
@@ -86,7 +85,6 @@ class ExchangeServiceImpl implements ExchangeService {
                 forEach(response ->
                              {
                                  log.debug("Peer #{} process request from {}", attributes.getId(), response.getIdPeer());
-
                                  if (response.getRecords().size() > 0) {
                                      log.info("Peer #{} get data from {} version {} record count {} ", attributes.getId(), response.getIdPeer(), response.getVersion(), response.getRecords().size());
                                      boolean incVersion = false;
@@ -111,11 +109,11 @@ class ExchangeServiceImpl implements ExchangeService {
                                                     Integer oldPeerVersion){
 
         log.debug("Peer #{} get pull request from {} version {}", attributes.getId(), id, oldPeerVersion);
-
         attributes.cancelIfNotActive();
 
         Integer currVersion = clockVector.getCurrVersion();
         Integer peerVersion = clockVector.getPeerVersion(id);
+
         List<Record> records = new ArrayList<>();
 
         log.debug("Peer #{} check pull request. Version {}, peer version {}, current version {} ", attributes.getId(), oldPeerVersion, peerVersion, currVersion);

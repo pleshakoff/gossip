@@ -31,7 +31,7 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public void add(String value) {
+    synchronized public void add(String value) {
         Integer version = clockVector.incCurrVersion();
         try {
             storage.insert(new Record(UUID.randomUUID().toString(), version, LocalDateTime.now(), value,
@@ -44,7 +44,7 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public Boolean add(Record record) {
+    synchronized public Boolean add(Record record) {
         if (record.getVisited().stream().noneMatch(visitedPeerId -> visitedPeerId.equals(attributes.getId()))
            &&!storage.contains(record.getId()))
         {
@@ -60,7 +60,7 @@ public class StorageServiceImpl implements StorageService {
             return  true;
         }
         else {
-            log.info("Peer #{} record {} already in storage",attributes.getId(), record.getId());
+            log.debug("Peer #{} record {} already in storage",attributes.getId(), record.getId());
             return false;
         }
     }
