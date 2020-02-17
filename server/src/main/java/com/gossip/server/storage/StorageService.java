@@ -7,4 +7,6 @@ public interface StorageService {
     List<Record> all();
 
     void add(String value);
+
+    Boolean add(Record record);
 }

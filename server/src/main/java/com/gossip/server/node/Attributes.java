@@ -7,4 +7,5 @@ public interface Attributes {
 
     void setActive(Boolean active);
 
+    void cancelIfNotActive();
 }

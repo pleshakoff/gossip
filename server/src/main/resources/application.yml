@@ -3,28 +3,9 @@ server:
      context-path: /api/${gossip.api.version}
 
 gossip:
-  id: 1
+  timeout: 2
   api:
     version: v1
-  timeout: 2
-
-network:
-  services:
-    -
-      name: 1
-      host: gossip-server-1
-      port: 8081
-      version: v1
-    -
-      name: 2
-      host: gossip-server-2
-      port: 8082
-      version: v1
-    -
-      name: 3
-      host: gossip-server-3
-      port: 8083
-      version: v1
 
 spring:
   application.name: gossip-server
@@ -43,10 +24,15 @@ logging:
   level:
      com.gossip.server:  DEBUG
 
-
 ---
 spring:
   profiles: one
+
+server:
+  port: 8081
+
+gossip:
+   id: 1
 
 network:
   services:
@@ -65,6 +51,12 @@ network:
 spring:
   profiles: two
 
+server:
+  port: 8082
+
+gossip:
+  id: 2
+
 network:
   services:
     -
@@ -81,6 +73,12 @@ network:
 ---
 spring:
   profiles: three
+
+server:
+  port: 8083
+
+gossip:
+  id: 3
 
 network:
   services:

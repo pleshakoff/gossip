@@ -2,11 +2,14 @@ package com.gossip.server.context;
 
 
 import com.gossip.server.node.Attributes;
+import com.gossip.server.node.clock.Clock;
+import com.gossip.server.node.clock.ClockVector;
 import com.gossip.server.node.peers.Peer;
 import com.gossip.server.node.peers.Peers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
 
 import java.util.List;
 
@@ -17,6 +20,7 @@ class ContextImpl implements Context {
 
     private final Peers peers;
     private final Attributes attributes;
+    private  final ClockVector  clockVector;
 
     @Override
     public Integer getId() {
@@ -43,10 +47,15 @@ class ContextImpl implements Context {
         return  peers.get(id);
     }
 
+    @Override
+    public List<Clock> getClock() {
+        return clockVector.get();
+    }
 
-
-
-
+    @Override
+    public void cancelIfNotActive() {
+        attributes.cancelIfNotActive();
+    }
 
 
 }

@@ -1,6 +1,7 @@
 package com.gossip.server.node;
 
 
+import com.gossip.server.exceptions.NotActiveException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ class AttributesImpl implements Attributes {
     @Getter
     private Integer id;
 
+
     @Getter
     Boolean active = true;
 
@@ -27,6 +29,13 @@ class AttributesImpl implements Attributes {
         this.active = active;
         log.info("Peer #{} {}", getId(),active?"STARTED":"STOPPED");
     }
+
+    @Override
+    public void cancelIfNotActive() {
+        if (!getActive())
+            throw  new NotActiveException();
+    }
+
 
 
 
