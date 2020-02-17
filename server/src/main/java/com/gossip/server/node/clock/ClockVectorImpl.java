@@ -3,7 +3,6 @@ package com.gossip.server.node.clock;
 
 import com.gossip.server.node.Attributes;
 import com.gossip.server.node.peers.Peers;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -49,10 +48,9 @@ public class ClockVectorImpl implements ClockVector {
     }
 
     @Override
-    public Integer decCurrVersion() {
+    public void decCurrVersion() {
         int version = clockList.get(0).getVersion().decrementAndGet();
         log.info("Peer #{} current version decremented to {}",attributes.getId(),version);
-        return version;
 
     }
 
@@ -63,13 +61,13 @@ public class ClockVectorImpl implements ClockVector {
     }
 
     @Override
-    public void setPeerVersion(Integer idPeer,
-                               Integer version) {
-        clockList.stream().filter(clock -> clock.getIdPeer().equals(idPeer)).findFirst().orElseThrow(
-                () -> new RuntimeException("Unknown id peer")).getVersion().set(version);
-        log.info("Peer #{} version set to {} for peer {}",attributes.getId(),version,idPeer);
-
+    public void incPeerVersion(Integer idPeer) {
+        Integer version = clockList.stream().filter(clock -> clock.getIdPeer().equals(idPeer)).findFirst().orElseThrow(
+                () -> new RuntimeException("Unknown id peer")).getVersion().incrementAndGet();
+        log.info("Peer #{} increment version {} for peer {}",attributes.getId(),version,idPeer);
     }
+
+
 
 
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class Record {
 
     @Setter
     private Integer version;
-    private final LocalTime timestamp;
+    private final LocalDateTime timestamp;
     private final String message;
     private final List<Integer> visited;
 }

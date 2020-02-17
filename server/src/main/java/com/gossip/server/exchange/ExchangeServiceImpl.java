@@ -2,8 +2,10 @@ package com.gossip.server.exchange;
 
 
 import com.gossip.server.context.Context;
+import com.gossip.server.node.Attributes;
 import com.gossip.server.node.clock.ClockVector;
 import com.gossip.server.node.peers.Peer;
+import com.gossip.server.node.peers.Peers;
 import com.gossip.server.storage.Record;
 import com.gossip.server.storage.StorageService;
 import com.network.http.Http;
@@ -25,14 +27,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 class ExchangeServiceImpl implements ExchangeService {
 
-    private final Context context;
+    private final Attributes attributes;
+    private final Peers peers;
     private final ClockVector clockVector;
     private final Http http;
     private final StorageService storageService;
 
+
     private List<ResponseGossipPullDTO> sendPullToAllPeers() {
         List<CompletableFuture<ResponseGossipPullDTO>> answerFutureList =
-                context.getPeers().stream()
+                peers.getPeers().stream()
                         .map(Peer::getId)
                         .map(this::sendPoolForOnePeer)
                         .collect(Collectors.toList());
@@ -48,9 +52,9 @@ class ExchangeServiceImpl implements ExchangeService {
     private CompletableFuture<ResponseGossipPullDTO> sendPoolForOnePeer(Integer idPeer) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                log.debug("Peer #{} send pull request to  {}",context.getId(), idPeer);
+                log.debug("Peer #{} send pull request to  {}", attributes.getId(), idPeer);
                 MultiValueMap<String,String> params  = new LinkedMultiValueMap<>();
-                params.add("id", context.getId().toString());
+                params.add("id", attributes.getId().toString());
                 params.add("version", clockVector.getPeerVersion(idPeer).toString());
 
                 ResponseEntity<ResponseGossipPullDTO> response = http.callGet(idPeer.toString(),
@@ -60,15 +64,15 @@ class ExchangeServiceImpl implements ExchangeService {
                 return Optional.ofNullable(response.getBody()).
                         orElse(null);
             } catch (HttpException e) {
-                log.error("Peer #{} pull request error for {}. Response status code {}", context.getId(),
+                log.error("Peer #{} pull request error for {}. Response status code {}", attributes.getId(),
                           idPeer, e.getStatusCode());
                 return null;
             } catch (ResourceAccessException e) {
-                log.error("Peer #{} pull request error for {}. {} {} ", context.getId(), idPeer, e.getClass(),e.getMessage());
+                log.error("Peer #{} pull request error for {}. {} {} ", attributes.getId(), idPeer, e.getClass(), e.getMessage());
                 return null;
             }
             catch (Exception e) {
-                log.error(String.format("Peer #%d pull request error for %d",context.getId(), idPeer), e);
+                log.error(String.format("Peer #%d pull request error for %d", attributes.getId(), idPeer), e);
                 return null;
             }
         });
@@ -82,14 +86,16 @@ class ExchangeServiceImpl implements ExchangeService {
         sendPullToAllPeers().stream().filter(Objects::nonNull).
                 forEach(response ->
                              {
-                                 log.debug("Peer #{} process request from {}",context.getId(), response.getIdPeer());
+                                 log.debug("Peer #{} process request from {}", attributes.getId(), response.getIdPeer());
 
                                  if (response.getRecords().size() > 0) {
-                                     clockVector.setPeerVersion(response.getIdPeer(),response.getVersion());
-                                     log.info("Peer #{} get data from {} version {} record count {} ",context.getId(), response.getIdPeer(),response.getVersion(),response.getRecords().size());
+                                     log.info("Peer #{} get data from {} version {} record count {} ", attributes.getId(), response.getIdPeer(), response.getVersion(), response.getRecords().size());
                                      boolean incVersion = false;
                                      for (Record record:response.getRecords()) {
-                                         incVersion = storageService.add(record)||incVersion;
+                                         clockVector.incPeerVersion(response.getIdPeer());
+                                         if (storageService.add(record)) {
+                                             incVersion = true;
+                                         }
                                      }
                                      if (incVersion) {
                                          clockVector.incCurrVersion();
@@ -105,24 +111,25 @@ class ExchangeServiceImpl implements ExchangeService {
     public ResponseGossipPullDTO gossipPullResponse(Integer id,
                                                     Integer oldPeerVersion){
 
-        log.debug("Peer #{} get pull request from {} version {}",context.getId(), id,oldPeerVersion);
+        log.debug("Peer #{} get pull request from {} version {}", attributes.getId(), id, oldPeerVersion);
 
-        context.cancelIfNotActive();
+        attributes.cancelIfNotActive();
 
         Integer currVersion = clockVector.getCurrVersion();
         Integer peerVersion = clockVector.getPeerVersion(id);
         List<Record> records = new ArrayList<>();
 
-        log.debug("Peer #{} check pull request. Version {}, peer version {}, current version {} ",context.getId(),oldPeerVersion,peerVersion,currVersion);
+        log.debug("Peer #{} check pull request. Version {}, peer version {}, current version {} ", attributes.getId(), oldPeerVersion, peerVersion, currVersion);
         if ((oldPeerVersion < currVersion) && (currVersion>peerVersion+1 || peerVersion==0))
         {
-            log.info("Peer #{} prepare data to answer {}.  Version {}, peer version {}, current version {} ",context.getId(),id,oldPeerVersion,peerVersion,currVersion);
+            log.debug("Peer #{} prepare data to answer {}.  Version {}, peer version {}, current version {} ",
+                     attributes.getId(), id, oldPeerVersion, peerVersion, currVersion);
             List<Record> storage = storageService.all();
             for (int i = storage.size()-1; i>=0 && storage.get(i).getVersion()>oldPeerVersion; i--) {
                 records.add(storage.get(i));
             }
         }
-        return new ResponseGossipPullDTO(context.getId(),currVersion,records);
+        return new ResponseGossipPullDTO(attributes.getId(), currVersion, records);
 
     }
 

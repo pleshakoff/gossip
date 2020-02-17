@@ -8,4 +8,5 @@ public interface Storage {
 
     void insert(Record record);
 
+    boolean contains(String id);
 }

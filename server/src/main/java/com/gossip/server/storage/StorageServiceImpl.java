@@ -6,10 +6,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -24,14 +27,15 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public List<Record> all() {
-        return storage.all();
+        return storage.all().stream().sorted(Comparator.comparing(Record::getTimestamp)).collect(
+                Collectors.toList());
     }
 
     @Override
     public void add(String value) {
         Integer version = clockVector.incCurrVersion();
         try {
-            storage.insert(new Record(UUID.randomUUID().toString(), version, LocalTime.now(), value,
+            storage.insert(new Record(UUID.randomUUID().toString(), version, LocalDateTime.now(), value,
                                       Collections.singletonList(attributes.getId())));
         }
         catch (Exception e){
@@ -42,7 +46,9 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public Boolean add(Record record) {
-        if (record.getVisited().stream().noneMatch(visitedPeerId -> visitedPeerId.equals(attributes.getId()))) {
+        if (record.getVisited().stream().noneMatch(visitedPeerId -> visitedPeerId.equals(attributes.getId()))
+           &&!storage.contains(record.getId()))
+        {
             record.getVisited().add(attributes.getId());
             record.setVersion(clockVector.incCurrVersion());
             try {

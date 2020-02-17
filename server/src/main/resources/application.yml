@@ -26,7 +26,7 @@ logging:
 
 ---
 spring:
-  profiles: one
+  profiles: gossipServer1
 
 server:
   port: 8081
@@ -49,7 +49,7 @@ network:
 
 ---
 spring:
-  profiles: two
+  profiles: gossipServer2
 
 server:
   port: 8082
@@ -72,7 +72,7 @@ network:
 
 ---
 spring:
-  profiles: three
+  profiles: gossipServer3
 
 server:
   port: 8083

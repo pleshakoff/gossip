@@ -1,6 +1,5 @@
 package com.gossip.server.node.clock;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
 public interface ClockVector {
@@ -12,10 +11,10 @@ public interface ClockVector {
 
     Integer incCurrVersion();
 
-    Integer decCurrVersion();
+    void decCurrVersion();
 
     Integer getPeerVersion(Integer idPeer);
 
-    void setPeerVersion(Integer idPeer,
-                        Integer version);
+    void incPeerVersion(Integer idPeer);
+
 }
