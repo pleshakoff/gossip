@@ -1,6 +1,5 @@
 package com.gossip.server.exchange;
 
-import com.gossip.server.context.Context;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;

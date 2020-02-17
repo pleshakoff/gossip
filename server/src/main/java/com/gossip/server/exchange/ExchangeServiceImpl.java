@@ -1,7 +1,6 @@
 package com.gossip.server.exchange;
 
 
-import com.gossip.server.context.Context;
 import com.gossip.server.node.Attributes;
 import com.gossip.server.node.clock.ClockVector;
 import com.gossip.server.node.peers.Peer;
