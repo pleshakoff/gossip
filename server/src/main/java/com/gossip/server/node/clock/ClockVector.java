@@ -13,8 +13,8 @@ public interface ClockVector {
 
     void decCurrVersion();
 
-    Integer getPeerVersion(Integer idPeer);
+    Integer getPeerVersion(String idPeer);
 
-    void incPeerVersion(Integer idPeer);
+    void incPeerVersion(String idPeer);
 
 }

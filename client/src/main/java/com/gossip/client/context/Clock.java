@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Getter
 public class Clock {
 
-    private  final Integer idPeer;
+    private  final String idPeer;
     private final AtomicInteger version;
 
 }

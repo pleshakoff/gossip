@@ -14,4 +14,4 @@ public class ServerApplication {
 
 }
 
-//-Pargs=--gossip.timeout=2,--gossip.id=1,--server.port=8081,--spring.profiles.active=debug
+//-Pargs=--spring.profiles.active=gossipServer1

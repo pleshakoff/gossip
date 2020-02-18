@@ -9,13 +9,13 @@ import java.util.List;
 
 public interface Context {
 
-    Integer getId();
+    String getId();
 
     void setActive(Boolean active);
     Boolean getActive();
 
     List<Peer> getPeers();
-    Peer getPeer(Integer id);
+    Peer getPeer(String id);
 
     Integer getStorageSize();
 

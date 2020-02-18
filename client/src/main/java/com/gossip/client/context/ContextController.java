@@ -25,13 +25,13 @@ class ContextController {
 
     @PostMapping("/stop")
     @ApiOperation(value = "Stop")
-    public void stop(@RequestParam Integer peerId) {
+    public void stop(@RequestParam String peerId) {
         contextService.stop(peerId);
     }
 
     @PostMapping("/start")
     @ApiOperation(value = "Start")
-    public void start(@RequestParam Integer peerId) {
+    public void start(@RequestParam String peerId) {
         contextService.start(peerId);
     }
 

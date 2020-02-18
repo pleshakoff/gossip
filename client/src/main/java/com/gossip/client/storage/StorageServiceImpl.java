@@ -17,13 +17,13 @@ public class StorageServiceImpl implements StorageService {
     private final ExchangeService exchangeService;
 
     @Override
-    public List<Record> all(Integer peerId) {
+    public List<Record> all(String peerId) {
       //  exchangeService.checkAvailable(peerId);
         return http.callGet(peerId.toString(), new ParameterizedTypeReference<List<Record>>() {}, "chat").getBody();
     }
 
     @Override
-    public Record add(Integer peerId, String value) {
+    public Record add(String peerId, String value) {
          exchangeService.checkAvailable(peerId);
          return http.callPost(peerId.toString(),Record.class,value,"chat").getBody();
     }

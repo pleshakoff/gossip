@@ -7,10 +7,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PeerImpl implements Peer {
 
-    final Integer id;
+    final String id;
 
     @Override
-    public Integer getId() {
+    public String getId() {
         return this.id;
     }
 

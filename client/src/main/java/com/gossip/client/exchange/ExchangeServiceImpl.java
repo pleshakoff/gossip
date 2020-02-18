@@ -58,7 +58,7 @@ public class ExchangeServiceImpl implements ExchangeService {
 
 
     @Override
-    public void checkAvailable(Integer peerId) {
+    public void checkAvailable(String peerId) {
          if (requestContextFromAllPeers().stream().noneMatch(context -> context.getId().equals(peerId) && context.getActive()))
          {
              throw new  PeerUnavailable();

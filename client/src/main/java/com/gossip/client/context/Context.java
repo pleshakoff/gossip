@@ -10,7 +10,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Context {
 
-    private final Integer id;
+    private final String id;
     private final Boolean active;
     private final Integer storageSize;
     List<Clock> clock;

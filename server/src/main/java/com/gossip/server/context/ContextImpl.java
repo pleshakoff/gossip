@@ -25,7 +25,7 @@ class ContextImpl implements Context {
     private  final Storage storage;
 
     @Override
-    public Integer getId() {
+    public String getId() {
         return attributes.getId();
     }
 
@@ -45,7 +45,7 @@ class ContextImpl implements Context {
     }
 
     @Override
-    public Peer getPeer(Integer id)  {
+    public Peer getPeer(String id)  {
         return  peers.get(id);
     }
 

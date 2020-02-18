@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 class ResponseGossipPullDTO {
 
-  private  final Integer idPeer;
+  private  final String idPeer;
   private final Integer version;
   private  final List<Record> records;
 

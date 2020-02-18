@@ -47,15 +47,15 @@ class ExchangeServiceImpl implements ExchangeService {
     }
 
 
-    private CompletableFuture<ResponseGossipPullDTO> sendPoolForOnePeer(Integer idPeer) {
+    private CompletableFuture<ResponseGossipPullDTO> sendPoolForOnePeer(String  idPeer) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 log.debug("Peer #{} send pull request to  {}", attributes.getId(), idPeer);
                 MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-                params.add("id", attributes.getId().toString());
+                params.add("id", attributes.getId());
                 params.add("version", clockVector.getPeerVersion(idPeer).toString());
 
-                ResponseEntity<ResponseGossipPullDTO> response = http.callGet(idPeer.toString(),
+                ResponseEntity<ResponseGossipPullDTO> response = http.callGet(idPeer,
                                                                               ResponseGossipPullDTO.class,
                                                                               params,
                                                                               "gossip");
@@ -82,7 +82,7 @@ class ExchangeServiceImpl implements ExchangeService {
         sendPullToAllPeers().stream().filter(Objects::nonNull).
                 forEach(response ->
                         {
-                            Integer idPeer = response.getIdPeer();
+                            String idPeer = response.getIdPeer();
                             log.debug("Peer #{} process request from {}", attributes.getId(), idPeer);
                             if (response.getRecords().size() > 0) {
                                 log.debug("Peer #{} get data from {} version {} record count {} ", attributes.getId(),
@@ -104,7 +104,7 @@ class ExchangeServiceImpl implements ExchangeService {
 
 
     @Override
-    public ResponseGossipPullDTO gossipPullResponse(Integer id,
+    public ResponseGossipPullDTO gossipPullResponse(String id,
                                                     Integer oldPeerVersion) {
 
         log.debug("Peer #{} get pull request from {} version {}", attributes.getId(), id, oldPeerVersion);

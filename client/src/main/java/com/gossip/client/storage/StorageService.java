@@ -4,9 +4,9 @@ import java.util.List;
 
 public interface StorageService {
 
-    List<Record> all(Integer peerId);
+    List<Record> all(String peerId);
 
-    Record add(Integer peerId,String message);
+    Record add(String peerId,String message);
 
 
 

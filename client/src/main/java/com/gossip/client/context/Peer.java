@@ -9,10 +9,10 @@ import lombok.Getter;
 @Getter
 public class Peer {
 
-    private final Integer id;
+    private final String id;
 
     @JsonCreator
-    public Peer(@JsonProperty("id") Integer id) {
+    public Peer(@JsonProperty("id") String id) {
         this.id = id;
     }
 }

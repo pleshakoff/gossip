@@ -55,13 +55,13 @@ public class ClockVectorImpl implements ClockVector {
     }
 
     @Override
-    public Integer getPeerVersion(Integer idPeer) {
+    public Integer getPeerVersion(String idPeer) {
         return clockList.stream().filter(clock -> clock.getIdPeer().equals(idPeer)).findFirst().orElseThrow(
                 () -> new RuntimeException("Unknown id peer")).getVersion().get();
     }
 
     @Override
-    public void incPeerVersion(Integer idPeer) {
+    public void incPeerVersion(String  idPeer) {
         Integer version = clockList.stream().filter(clock -> clock.getIdPeer().equals(idPeer)).findFirst().orElseThrow(
                 () -> new RuntimeException("Unknown id peer")).getVersion().incrementAndGet();
         log.info("Peer #{} increment version {} for peer {}",attributes.getId(),version,idPeer);

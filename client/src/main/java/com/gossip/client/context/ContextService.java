@@ -4,9 +4,9 @@ import java.util.List;
 
 public interface ContextService {
 
-    void stop(Integer peerId);
+    void stop(String peerId);
 
-    void start(Integer peerId);
+    void start(String peerId);
 
     List<Context> all();
 

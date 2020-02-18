@@ -1,9 +1,11 @@
 package com.gossip.server.node.peers;
 
+import java.util.List;
+
 public interface Peers {
 
-    Peer get(Integer id);
+    Peer get(String id);
 
-    java.util.List<Peer> getPeers();
+    List<Peer> getPeers();
 
 }

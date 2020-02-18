@@ -18,12 +18,12 @@ class ContextServiceImpl implements ContextService {
 
 
     @Override
-    public void start(Integer peerId) {
+    public void start(String peerId) {
         http.callPost(peerId.toString(),null,null,"context","start");
     }
 
     @Override
-    public void stop(Integer peerId) {
+    public void stop(String peerId) {
         exchangeService.checkAvailable(peerId);
         http.callPost(peerId.toString(),null,null,"context","stop");
     }

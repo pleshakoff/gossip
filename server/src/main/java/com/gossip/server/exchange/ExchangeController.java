@@ -16,11 +16,10 @@ class ExchangeController {
     private final ExchangeService exchangeService;
 
     @GetMapping
-    @ApiOperation(value = "Get current node meta information")
-    public ResponseGossipPullDTO getCurrentPeerState(@RequestParam Integer id, @RequestParam Integer version)  {
+    @ApiOperation(value = "Gossip pull")
+    public ResponseGossipPullDTO gossip(@RequestParam String id, @RequestParam Integer version)
+    {
       return exchangeService.gossipPullResponse(id, version);
     }
-
-
 
 }

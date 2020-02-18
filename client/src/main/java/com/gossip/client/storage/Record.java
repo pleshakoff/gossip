@@ -15,5 +15,5 @@ public class Record {
     private final String id;
     private final LocalDateTime timestamp;
     private final String message;
-    private final List<Integer> visited;
+    private final List<String> visited;
 }

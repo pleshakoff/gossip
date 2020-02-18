@@ -19,13 +19,13 @@ class PeersImpl implements Peers {
     @Getter
     private final List<Peer> peers = new ArrayList<>();
 
-    private void add(Integer id) {
+    private void add(String id) {
         peers.add(new PeerImpl(id));
     }
 
 
     @Override
-    public  Peer get(Integer id) {
+    public  Peer get(String id) {
         return peers.stream().
                 filter(peer -> peer.getId().equals(id)).
                 findFirst().
@@ -36,7 +36,6 @@ class PeersImpl implements Peers {
      void init() {
         servicesProps.getServices().stream().
                 map(Service::getName).
-                map(Integer::parseInt).
                 forEach(this::add);
     }
 }

@@ -18,7 +18,7 @@ class AttributesImpl implements Attributes {
 
     @Value("${gossip.id}")
     @Getter
-    private Integer id;
+    private String id;
 
 
     @Getter

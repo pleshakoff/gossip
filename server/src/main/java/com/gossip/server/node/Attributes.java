@@ -1,7 +1,7 @@
 package com.gossip.server.node;
 
 public interface Attributes {
-    Integer getId();
+    String getId();
 
     Boolean getActive();
 

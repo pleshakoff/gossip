@@ -20,14 +20,14 @@ class StorageController {
 
     @GetMapping
     @ApiOperation(value = "Get all chat")
-    public List<Record> all(@RequestParam Integer peerId){
+    public List<Record> all(@RequestParam String peerId){
 
         return storageService.all(peerId);
     }
 
     @PostMapping
     @ApiOperation(value = "Add message to chat")
-    public Record add(@RequestParam Integer peerId,@RequestBody String message){
+    public Record add(@RequestParam String peerId,@RequestBody String message){
 
         return storageService.add(peerId,message);
     }

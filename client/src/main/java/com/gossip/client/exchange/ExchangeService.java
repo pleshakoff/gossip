@@ -8,5 +8,5 @@ public interface ExchangeService {
 
     List<Context> requestContextFromAllPeers();
 
-    void checkAvailable(Integer peerId);
+    void checkAvailable(String peerId);
 }
