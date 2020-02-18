@@ -1,0 +1,71 @@
+version: "3"
+services:
+#################RAFT-CLIENT######################
+  gossip-client:
+    build:
+      dockerfile: Dockerfile_client
+      context: .
+    ports:
+      - "8080:8080"
+    networks:
+      - app
+    environment:
+      - JVM_OPTS=-Xmx128m -Xms64m
+ #################RAFT-SERVER######################
+  gossip-server-1:
+    build:
+      dockerfile: Dockerfile_server
+      context: .
+    ports:
+      - "8081:8081"
+    networks:
+      - app
+    environment:
+      - JVM_OPTS=-Xmx128m -Xms64m
+    command: --spring.profiles.active=gossipServer1
+  gossip-server-2:
+    build:
+      dockerfile: Dockerfile_server
+      context: .
+    ports:
+      - "8082:8082"
+    networks:
+      - app
+    environment:
+      - JVM_OPTS=-Xmx128m -Xms64m
+    command: --spring.profiles.active=gossipServer2
+  gossip-server-3:
+    build:
+      dockerfile: Dockerfile_server
+      context: .
+    ports:
+      - "8083:8083"
+    networks:
+      - app
+    environment:
+      - JVM_OPTS=-Xmx128m -Xms64m
+    command: --spring.profiles.active=gossipServer3
+  gossip-server-4:
+    build:
+      dockerfile: Dockerfile_server
+      context: .
+    ports:
+      - "8084:8084"
+    networks:
+      - app
+    environment:
+      - JVM_OPTS=-Xmx128m -Xms64m
+    command: --spring.profiles.active=gossipServer4
+  gossip-server-5:
+    build:
+      dockerfile: Dockerfile_server
+      context: .
+    ports:
+      - "8085:8085"
+    networks:
+      - app
+    environment:
+      - JVM_OPTS=-Xmx128m -Xms64m
+    command: --spring.profiles.active=gossipServer5
+networks:
+  app:

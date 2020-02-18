@@ -1,0 +1,165 @@
+server:
+  servlet:
+    context-path: /api/${gossip.api.version}
+
+gossip:
+  api:
+    version: v1
+
+spring:
+  application.name: gossip-server
+  hateoas:
+    use-hal-as-default-json-media-type: false
+
+logging:
+  level:
+    com.network.http.rest_template:  ERROR
+
+---
+spring:
+  profiles: debug
+
+logging:
+  level:
+    com.gossip.server:  DEBUG
+
+
+####################SERVER 1
+---
+spring:
+  profiles: gossipServer1
+
+server:
+  port: 8081
+
+gossip:
+   id: 1
+   timeout: 2
+
+network:
+  services:
+    -
+      name: 2
+      host: gossip-server-2
+      port: 8082
+      version: v1
+    -
+      name: 4
+      host: gossip-server-4
+      port: 8084
+      version: v1
+
+
+####################SERVER 2
+---
+spring:
+  profiles: gossipServer2
+
+server:
+  port: 8082
+
+gossip:
+  id: 2
+  timeout: 2
+
+network:
+  services:
+    -
+      name: 1
+      host: gossip-server-1
+      port: 8081
+      version: v1
+    -
+      name: 3
+      host: gossip-server-3
+      port: 8083
+      version: v1
+
+    -
+      name: 5
+      host: gossip-server-5
+      port: 8085
+      version: v1
+
+####################SERVER 3
+---
+spring:
+  profiles: gossipServer3
+
+server:
+  port: 8083
+
+gossip:
+  id: 3
+  timeout: 2
+
+network:
+  services:
+    -
+      name: 2
+      host: gossip-server-2
+      port: 8082
+      version: v1
+    -
+      name: 4
+      host: gossip-server-4
+      port: 8084
+      version: v1
+
+
+####################SERVER 4
+---
+spring:
+  profiles: gossipServer4
+
+server:
+  port: 8084
+
+gossip:
+  id: 4
+  timeout: 2
+
+network:
+  services:
+    -
+      name: 1
+      host: gossip-server-1
+      port: 8081
+      version: v1
+    -
+      name: 3
+      host: gossip-server-3
+      port: 8083
+      version: v1
+    -
+      name: 5
+      host: gossip-server-5
+      port: 8085
+      version: v1
+
+
+####################SERVER 5
+---
+spring:
+  profiles: gossipServer5
+
+server:
+  port: 8085
+
+gossip:
+  id: 5
+  timeout: 2
+
+network:
+  services:
+    -
+      name: 2
+      host: gossip-server-2
+      port: 8082
+      version: v1
+    -
+      name: 4
+      host: gossip-server-4
+      port: 8084
+      version: v1
+
