@@ -42,9 +42,9 @@ network:
       port: 8082
       version: v1
     -
-      name: 3
-      host: gossip-server-3
-      port: 8083
+      name: 4
+      host: gossip-server-4
+      port: 8084
       version: v1
 
 ---
@@ -70,6 +70,11 @@ network:
       port: 8083
       version: v1
 
+    -
+      name: 5
+      host: gossip-server-5
+      port: 8085
+      version: v1
 ---
 spring:
   profiles: gossipServer3
@@ -83,12 +88,64 @@ gossip:
 network:
   services:
     -
+      name: 2
+      host: gossip-server-2
+      port: 8082
+      version: v1
+    -
+      name: 4
+      host: gossip-server-4
+      port: 8084
+      version: v1
+
+---
+spring:
+  profiles: gossipServer4
+
+server:
+  port: 8084
+
+gossip:
+  id: 4
+
+network:
+  services:
+    -
       name: 1
       host: gossip-server-1
       port: 8081
       version: v1
     -
+      name: 3
+      host: gossip-server-3
+      port: 8083
+      version: v1
+    -
+      name: 5
+      host: gossip-server-5
+      port: 8085
+      version: v1
+
+---
+spring:
+  profiles: gossipServer5
+
+server:
+  port: 8085
+
+gossip:
+  id: 5
+
+network:
+  services:
+    -
       name: 2
       host: gossip-server-2
       port: 8082
       version: v1
+    -
+      name: 4
+      host: gossip-server-4
+      port: 8084
+      version: v1
+

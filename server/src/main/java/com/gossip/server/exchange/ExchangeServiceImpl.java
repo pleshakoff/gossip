@@ -42,17 +42,16 @@ class ExchangeServiceImpl implements ExchangeService {
         return CompletableFuture.allOf(
                 answerFutureList.toArray(new CompletableFuture[0])
         ).thenApply(v ->
-                      answerFutureList.stream().map(CompletableFuture::join).collect(Collectors.toList())
+                            answerFutureList.stream().map(CompletableFuture::join).collect(Collectors.toList())
         ).join();
     }
-
 
 
     private CompletableFuture<ResponseGossipPullDTO> sendPoolForOnePeer(Integer idPeer) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 log.debug("Peer #{} send pull request to  {}", attributes.getId(), idPeer);
-                MultiValueMap<String,String> params  = new LinkedMultiValueMap<>();
+                MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
                 params.add("id", attributes.getId().toString());
                 params.add("version", clockVector.getPeerVersion(idPeer).toString());
 
@@ -66,10 +65,10 @@ class ExchangeServiceImpl implements ExchangeService {
                           idPeer, e.getStatusCode());
                 return null;
             } catch (ResourceAccessException e) {
-                log.error("Peer #{} pull request error for {}. {} {} ", attributes.getId(), idPeer, e.getClass(), e.getMessage());
+                log.error("Peer #{} pull request error for {}. {} {} ", attributes.getId(), idPeer, e.getClass(),
+                          e.getMessage());
                 return null;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 log.error(String.format("Peer #%d pull request error for %d", attributes.getId(), idPeer), e);
                 return null;
             }
@@ -77,36 +76,36 @@ class ExchangeServiceImpl implements ExchangeService {
     }
 
 
-
     @Override
-    public void  gossipPull(){
+    public void gossipPull() {
 
         sendPullToAllPeers().stream().filter(Objects::nonNull).
                 forEach(response ->
-                             {
-                                 log.debug("Peer #{} process request from {}", attributes.getId(), response.getIdPeer());
-                                 if (response.getRecords().size() > 0) {
-                                     log.info("Peer #{} get data from {} version {} record count {} ", attributes.getId(), response.getIdPeer(), response.getVersion(), response.getRecords().size());
-                                     boolean incVersion = false;
-                                     for (Record record:response.getRecords()) {
-                                         clockVector.incPeerVersion(response.getIdPeer());
-                                         if (storageService.add(record)) {
-                                             incVersion = true;
-                                         }
-                                     }
-                                     if (incVersion) {
-                                         clockVector.incCurrVersion();
-                                     }
-                                 }
-                             }
-                          );
+                        {
+                            Integer idPeer = response.getIdPeer();
+                            log.debug("Peer #{} process request from {}", attributes.getId(), idPeer);
+                            if (response.getRecords().size() > 0) {
+                                log.debug("Peer #{} get data from {} version {} record count {} ", attributes.getId(),
+                                         idPeer, response.getVersion(), response.getRecords().size());
+                                boolean incVersion = false;
+                                for (Record record : response.getRecords()) {
+                                    if (storageService.add(record)) {
+                                        clockVector.incPeerVersion(idPeer);
+                                        incVersion = true;
+                                    }
+                                }
+                                if (incVersion) {
+                                    clockVector.incCurrVersion();
+                                }
+                            }
+                        }
+                );
     }
-
 
 
     @Override
     public ResponseGossipPullDTO gossipPullResponse(Integer id,
-                                                    Integer oldPeerVersion){
+                                                    Integer oldPeerVersion) {
 
         log.debug("Peer #{} get pull request from {} version {}", attributes.getId(), id, oldPeerVersion);
         attributes.cancelIfNotActive();
@@ -116,21 +115,19 @@ class ExchangeServiceImpl implements ExchangeService {
 
         List<Record> records = new ArrayList<>();
 
-        log.debug("Peer #{} check pull request. Version {}, peer version {}, current version {} ", attributes.getId(), oldPeerVersion, peerVersion, currVersion);
-        if ((oldPeerVersion < currVersion) && (currVersion>peerVersion+1 || peerVersion==0))
-        {
+        log.debug("Peer #{} check pull request. Version {}, peer version {}, current version {} ", attributes.getId(),
+                  oldPeerVersion, peerVersion, currVersion);
+        if ((oldPeerVersion < currVersion) && (currVersion > peerVersion + 1 || peerVersion == 0)) {
             log.debug("Peer #{} prepare data to answer {}.  Version {}, peer version {}, current version {} ",
-                     attributes.getId(), id, oldPeerVersion, peerVersion, currVersion);
+                      attributes.getId(), id, oldPeerVersion, peerVersion, currVersion);
             List<Record> storage = storageService.all();
-            for (int i = storage.size()-1; i>=0 && storage.get(i).getVersion()>oldPeerVersion; i--) {
+            for (int i = storage.size() - 1; i >= 0 && storage.get(i).getVersion() > oldPeerVersion; i--) {
                 records.add(storage.get(i));
             }
         }
         return new ResponseGossipPullDTO(attributes.getId(), currVersion, records);
 
     }
-
-
 
 
 }

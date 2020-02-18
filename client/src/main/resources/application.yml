@@ -1,4 +1,3 @@
-
 server:
   servlet:
      context-path: /api/${gossip.api.version}
@@ -25,16 +24,16 @@ network:
       host: gossip-server-3
       port: 8083
       version: v1
-#    -
-#      name: 4
-#      host: gossip-client-4
-#      port: 8084
-#      version: v1
-#    -
-#      name: 5
-#      host: gossip-client-5
-#      port: 8085
-#      version: v1
+    -
+      name: 4
+      host: gossip-server-4
+      port: 8084
+      version: v1
+    -
+      name: 5
+      host: gossip-server-5
+      port: 8085
+      version: v1
 
 spring:
   application.name: gossip-client
