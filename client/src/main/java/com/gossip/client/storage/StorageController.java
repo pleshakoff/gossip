@@ -27,9 +27,9 @@ class StorageController {
 
     @PostMapping
     @ApiOperation(value = "Add message to chat")
-    public void add(@RequestParam Integer peerId,@RequestBody String message){
+    public Record add(@RequestParam Integer peerId,@RequestBody String message){
 
-        storageService.add(peerId,message);
+        return storageService.add(peerId,message);
     }
 
 

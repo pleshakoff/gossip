@@ -23,9 +23,9 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public void add(Integer peerId, String value) {
+    public Record add(Integer peerId, String value) {
          exchangeService.checkAvailable(peerId);
-         http.callPost(peerId.toString(),null,value,"chat");
+         return http.callPost(peerId.toString(),Record.class,value,"chat").getBody();
     }
 
 

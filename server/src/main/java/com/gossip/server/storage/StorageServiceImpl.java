@@ -31,11 +31,13 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    synchronized public void add(String value) {
+    synchronized public Record add(String value) {
         Integer version = clockVector.incCurrVersion();
         try {
-            storage.insert(new Record(UUID.randomUUID().toString(), version, LocalDateTime.now(), value,
-                                      Collections.singletonList(attributes.getId())));
+            Record record = new Record(UUID.randomUUID().toString(), version, LocalDateTime.now(), value,
+                                       Collections.singletonList(attributes.getId()));
+            storage.insert(record);
+            return record;
         }
         catch (Exception e){
             clockVector.decCurrVersion();

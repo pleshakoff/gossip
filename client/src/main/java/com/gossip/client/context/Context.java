@@ -13,5 +13,7 @@ public class Context {
     private final Integer id;
     private final Boolean active;
     private final Integer storageSize;
+    List<Clock> clock;
     private final List<Peer> peers;
+
 }

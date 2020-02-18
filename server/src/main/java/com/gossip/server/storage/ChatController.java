@@ -25,9 +25,9 @@ class ChatController {
 
     @PostMapping
     @ApiOperation(value = "Add message to chat")
-    public void add(@RequestBody String value){
+    public Record add(@RequestBody String value){
 
-        storageService.add(value);
+        return storageService.add(value);
     }
 
 

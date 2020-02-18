@@ -6,7 +6,7 @@ public interface StorageService {
 
     List<Record> all(Integer peerId);
 
-    void add(Integer peerId,String message);
+    Record add(Integer peerId,String message);
 
 
 
