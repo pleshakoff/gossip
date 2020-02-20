@@ -97,6 +97,8 @@ class ExchangeServiceImpl implements ExchangeService {
                                 if (incVersion) {
                                     clockVector.incCurrVersion();
                                 }
+                                while (clockVector.getPeerVersion(idPeer)<Math.min(response.getVersion(),clockVector.getCurrVersion()-2))
+                                    clockVector.incPeerVersion(idPeer);
                             }
                         }
                 );
