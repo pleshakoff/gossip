@@ -10,11 +10,13 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Component
 @RequiredArgsConstructor
 class PeersImpl implements Peers {
     private final ServicesProps servicesProps;
+    private final Random rnd = new Random();
 
     @Getter
     private final List<Peer> peers = new ArrayList<>();
@@ -31,6 +33,12 @@ class PeersImpl implements Peers {
                 findFirst().
                 orElseThrow(() -> new RuntimeException(String.format("Unsupported peer Id %s",id)));
     }
+
+    @Override
+    public  Peer getRandom() {
+        return peers.get(rnd.nextInt(peers.size()));
+    }
+
 
     @PostConstruct
      void init() {

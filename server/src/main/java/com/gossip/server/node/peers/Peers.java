@@ -8,4 +8,5 @@ public interface Peers {
 
     List<Peer> getPeers();
 
+    Peer getRandom();
 }
