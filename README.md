@@ -1,187 +1,185 @@
 # GOSSIP
-## Синхронизациия данных чата между узлами по протоколу GOSSIP  
+## Chat data synchronization between nodes using GOSSIP protocol 
 
-1. [Описание системы](#desc)
+1. [System Description](#desc)
 2. [Get started](#get-started)
-3. [Примеры](#examples)
+3. [Examples](#examples)
 
 
 <a name="desc"></a>
-## Описание системы. 
+## System description. 
 
 ![alt text](https://github.com/pleshakoff/gossip/blob/master/GOSSIP.png?raw=true"")
 
-Распределенная AP система для хранения сообщений, отправленных в чат.
-Для репликации данных используется протокол GOSSIP.
-Реализация написана на Java+Spring Boot.
+Distributed AP system for storing messages sent to the chat.
+GOSSIP protocol is used for data replication.
+The implementation is written in Java+Spring Boot.
  
-Система состоит из двух модулей, для двух типов нод: клиент и сервер. 
-Можно развернуть неограниченное количество инстансов как сервера так и клиента.
-В текущей конфигурации настроены 5 нод и 1 клиент. 
-Топология сети показана на рисунке выше. Топология настраивается в конфигурационном файле 
-(подробнее [конфигурирование](#config))
+The system consists of two modules for two types of nodes: client and server. 
+You can deploy an unlimited number of instances of both the server and the client.
+In the current configuration, 5 nodes and 1 client are configured. 
+The network topology is shown in the figure above. The topology is configured in the configuration file 
+(more details [configuration](#config)) 
 
-  
-
-### Сервер
+### Server 
 
 https://github.com/pleshakoff/gossip/tree/master/server
 
-Доступны пять нод. Идентификаторы нод: 1,2,3,4,5
+Five nodes are available. Node IDs: 1,2,3,4,5
 
-С API можно работать через swagger(подробенее в разделе [API](#api))
+You can work with the API via swagger (more details in [API](#api))
 
-#### Описание 
+#### Description
 
-Серверная нода умет добавлять данные в чат и показывать все записи чата. 
+The server node is able to add data to the chat and show all chat records. 
 
-Каждая серверная нода имеет доступ к БД, в которой хранятся непосредственно данные. 
+Each server node has access to database in which data is stored. 
 
-БД у каждой ноды своя отдельная. 
+Each node has its own separate database. 
 
-В текущей реализации используется embedded in-memory решения для БД.
-(конкурентный List). Так же для быстрой проверки есть ли запись уже в чате, 
-в качестве инедекса БД используется HashSet (O(1) для  операции contains)    
-В случае необходимости можно просто имплементировать соответствующий интерфейс 
-для поддержки иных типов хранилищ.
+The current implementation uses embedded in-memory database solutions.
+(Competitive List). Also, 
+HashSet (O(1) is used as the database index for the contains operation to quickly check if there is a record already in the chat    
+If necessary, you can simply implement the appropriate interface 
+to support other types of storage.
 
-На серверной ноде запущен таймер для запуска gossip взаимодействия. 
-В текущей реализации выбрана стратегия pull.  
+A timer has been started in the server node to start gossip interaction. 
+The pull strategy is selected in the current implementation.  
 
-Каждая нода по таймеру опрашивает своих соседей на предмет наличия новых записей. 
-Для хранения состояния данных каждой ноды используется концепция "логические часы". 
+Each timer node polls its neighbors for the new records. 
+The concept of logical clocks is used to store the data state of each node. 
 
-Текущая версия данных и версии соседних нод (с точки зрения текущей ноды) хранятся 
-в специальном векторе, любое изменение данных ноды приводит к увеличению версии в векторе.
+The current version of the data and the versions of neighboring nodes (from the point of view of the current node) are stored 
+in a special vector. Any change in the node data leads to an increase in the version vector.
 
-Если данные ноды менялись по результатам pull запроса к соседней ноде, то в векторе повышается версия
-данных соседней ноды и текущая версия ноды + 1.   
+If the node data changed based as a result of a pull request to a neighboring node, then the 
+data version of the neighboring node and the current node version + 1 are increased in the vector.   
        
-При запросе данных нода отправляет ноде поставщику свой вариант версии данных ноды поставщика, 
-и если у ноды поставщика версия уже выше чем присланная, то она в ответ присылает новые данные.
-Важно что версия должна быть не просто выше. Текущая версия ноды поставщика 
-также должна быть выше версии ноды получателя в векторе ноды поставшика более чем на 1
-(или же версия ноды получателя в векторе поставщика = 0). 
-Это означает что эти новые изменения были получены не с ноды получателя и их еще нет у получателя 
-и их можно отдать получателю. 
+When requesting data, the node sends the supplier node its version of the data version of the supplier node. 
+If the supplier node has a version already higher than the one sent, it sends new data in response.
+It is important that the version should not just be higher. The current version of the sender node 
+must also be higher than the version of the receiver node in the sender node vector by more than 1 
+(or the version of the receiver node in the sender vector = 0). 
+It means that these new changes were not received from the receiver node and the receiver does not have them yet 
+and they can be given to the receiver. 
 
-Рассмотрим пример с двумя узлами 
+Let's consider example with two nodes
 
-Есть две ноды
+There are two nodes
  
 * 1[0,0]
 * 2[0,0]  
 
-Добавляем в первую ноду одну запись 
+Adding one record to the first node 
 
 * 1 [1,0]
-* 2 [0,0]  
+* 2 [0,0] 
 
-Вторая нода запрашивает данные у первой, отправляя номер версии 0 и в ответ получает новую запись 
-(версия ноды №2(получателя) в векторе ноды №1(поставщика) равна 0, поэтому данные можно отправить). 
-При вставке каждой новой записи нода №2 увеличивает номер своей версии в векторе и номер версии узла №1.
-И еще сверху к текущей версии ноды добавляет единицу, чтобы показать что данные вставлялись 
-в результате обмена данных   
+The second node requests data from the first one by sending the version number 0 and receives a new record in response 
+(the version of node #2 (receiver) in the node vector #1 (sender) is 0, so the data can be sent). 
+When inserting each new record, node #2 increases its version number in the vector and the version number of node #1.
+And it adds a unit on top of the current node version to show that the data was inserted as 
+a result of data exchange
          
 * 1 [1,0]
 * 2 [1,2]  
 
-Первая нода запрашивает данные у второй, посылая версию 0. И в ответ получает 0 записей. 
-Так как версия ноды поставщика в векторе поставщика (равна 2) - не больше версии ноды получателя+1 (равна 1)    
+The first node requests data from the second, sending version 0. And gets 0 records in response. 
+Since the sender node version in the sender vector (equal to 2) is no more than the recevier node version +1 (equal to 1)    
 * 1 [1,0]
 * 2 [1,2]  
 
-Так как данные на ноду могут прийти разными путями, то все равно, во избежании зацикливания необходимо
-обеспечить проверку.
+Since the data can come to the node in different ways, it is still necessary to 
+provide verification in order to avoid looping.
 
-У каждой записи в чате есть массив "visited" со списком узлов, через которые прошла запись. 
-Если запись уже была на этом узле, она не вставляется. 
+Each chat record has visited array with a list of nodes in which the record has passed. 
+If the record was already in this node, it is not inserted. 
 
-Также у каждой записи есть поле "version" в котором содержится локальная версия внутри ноды, соответствующая 
-версии на логических часах в момент вставки.
-Версия нужна для вытягивания нужных данных по запросу соседними нодами.     
+Also, each record has version field that contains the local version in the node corresponding to the 
+logical clocks version at the time of insertion.
+The version is needed to pull the necessary data on request by neighboring nodes.     
  
-Для того чтобы можно было эмулировать отключения нод без опускания контейнеров, есть возможность через API
-останавливать ноды. После остановки нода молчит, она недоступна для других нод и для записи клиентом.  
-Но есть возможность получить содержимое чата, что удобно для исследований поведения кластера 
-в нешататной ситуации. 
+In order to be able to emulate node disconnections without stopping containers, it is possible to 
+stop nodes via the API. After the node is stopped, it is silent and not available for other nodes and for recording by the client.  
+But it is possible to get the chat contents, which is convenient for studying the cluster behavior 
+in a extraordinary situation. 
 
       
 <a name="api"></a>            
 #### API 
 
-Нода #1:  http://localhost:8081/api/v1/swagger-ui.html
+Node #1: http://localhost:8081/api/v1/swagger-ui.html
 
-Нода #2:  http://localhost:8082/api/v1/swagger-ui.html
+Node #2: http://localhost:8082/api/v1/swagger-ui.html
 
-Нода #3:  http://localhost:8083/api/v1/swagger-ui.html
+Node #3: http://localhost:8083/api/v1/swagger-ui.html
 
-Нода #4:  http://localhost:8084/api/v1/swagger-ui.html
+Node #4: http://localhost:8084/api/v1/swagger-ui.html
 
-Нода #5:  http://localhost:8085/api/v1/swagger-ui.html
+Node #5: http://localhost:8085/api/v1/swagger-ui.html
    
-В API доступны следующее группы методов 
+The following groups of methods are available in the API 
 
-* Context. Получение метаданных ноды. Остановка/запуск ноды 
-* Chat. Добавление сообщения в чат. Просмотр чата.
-* Gossip. Эндпоинт для pull запросов
+* Context. Getting node metadata. Stop/start the node 
+* Chat. Adding a message to the chat. View the chat.
+* Gossip. Endpoint for pull requests
 
-#### Реализация 
+#### Realization
 
-Пакеты:
+Packages:
 
 * [node](https://github.com/pleshakoff/gossip/tree/master/server/src/main/java/com/gossip/server/node). 
-Метаданные узла. Данные нодов соседей. Логическое время    
+Node metadata. Neighbor node data. Logical time 
 * [exchange](https://github.com/pleshakoff/gossip/tree/master/server/src/main/java/com/gossip/server/exchange). 
-Сервис для отправки и обработки gossip pull реквеста.   
+Service for sending and processing gossip pull request.   
 * [storage](https://github.com/pleshakoff/gossip/tree/master/server/src/main/java/com/gossip/server/storage). 
-Интерфейс для доступа к БД. Его in memory реализация. Сервис для операций с БД. 
+Interface for accessing the database. Its in memory implementation. Service for database operations. 
 * [context](https://github.com/pleshakoff/gossip/tree/master/server/src/main/java/com/gossip/server/context). 
-Декоратор для удобного доступа к метаданным узла.  
+Decorator for easy access to node metadata.  
 * [timer](https://github.com/pleshakoff/gossip/tree/master/server/src/main/java/com/gossip/server/timer). 
-Таймер для gossip обмена  
+Timer for gossip exchange 
 
-  
-### Клиент
+
+### Client 
 
 https://github.com/pleshakoff/gossip/tree/master/client
 
-В текущей конфигурации запускается в единственном экземпляре. 
-С API можно работать через swagger(подробенее в разделе [API](#apiclient))
+It runs in a single instance in the current configuration. 
+You can work with the API via swagger (more details in [API](#apiclient))
 
-#### Описание 
+#### Description
 
-Отправляет запросы серверу. 
-Может собрать метаданные со всего кластера и показать доступные ноды и их состояния. 
+Sends requests to the server. 
+It can collect metadata from the entire cluster and show the available nodes and their states. 
 
-Чтение и запись можно осуществлять на любую ноду.  
-В текущей реализации клиент не умеет сам решать какую ноду вызвать, 
-это надо указать в параметре запроса, так сделано специально 
-чтобы удобно было исследовать поведение разных нод.
+Reading and recording can be done in any node.  
+The client does not know which node to call in the current implementation, 
+it must be specified in the request parameter. It is done intentionally 
+for easy investigating the behavior of different nodes.
 
-При записи, добавляется запись в БД выбранной ноды. 
-После этого данные постепенно синхронизируются на всех остальных узлах
+A record is added to the database of the selected node during recording. 
+After that, the data is gradually synchronized in all other nodes
 
       
 <a name="apiclient"></a>            
 #### API 
 
-Клиент:  http://localhost:8080/api/v1/swagger-ui.html
+Client: http://localhost:8080/api/v1/swagger-ui.html
    
-В API доступны следующее группы методов 
+The following groups of methods are available in the API 
 
-* Context. Получение метаданных с всего кластера. Остановка/запуск нод. 
-* Chat. Добавление сообщения в чат. Просмотр чата   
+* Context. Getting metadata from the entire cluster. Stop/start the node. 
+* Chat. Adding a message to the chat. View the chat
 
-#### Реализация 
+#### Realization
 
 
-Пакеты
+Packages
 
 * [exchange](https://github.com/pleshakoff/gossip/tree/master/client/src/main/java/com/gossip/client/exchange). 
-Сервис для получения метаданных серверных нод     
+Service for obtaining metadata of server nodes
 
-Все остальное это просто редиректы к ендпоинтам серверных нод для чтения и записи данных.  
+Everything else is just redirects to endpoints of server nodes for reading and recording data.  
 
     
 
@@ -189,57 +187,57 @@ https://github.com/pleshakoff/gossip/tree/master/client
 <a name="get-started"></a>
 ## Get started 
 
-В корне репозитория лежит [docker-compose.yml](https://github.com/pleshakoff/gossip/blob/master/docker-compose.yml)
-его надо запустить, поднимается пять серверных нод и клиент.
+At the root of the repository you can find [docker-compose.yml](https://github.com/pleshakoff/gossip/blob/master/docker-compose.yml )
+it needs to be launched, five server nodes and a client start.
 
-` docker-compose up`
+`docker-compose up`
 
 
 <a name="config"></a>
-##### Конфигурирование 
+##### Configuration
 
-В корне репозитория лежат конфигурационные файлы для серверной ноды 
-[config_server.yml](https://github.com/pleshakoff/gossip/blob/master/config_server.yml)
-и для клиентской ноды 
+The configuration files for the server node lie at the root of the repository  
+[config_server.yml](https://github.com/pleshakoff/gossip/blob/master/config_server.yml )
+and for the client node 
 [config_client.yml](https://github.com/pleshakoff/gossip/blob/master/config_client.yml).
 
-При запуске docker-compose собираются локальные контейнеры(на базе контейнеров приложения из docker hub) 
-и файл конфигурации копируется в этот контейнер(см. 
+When starting docker-compose, local containers are assembled (based on app containers from docker hub) 
+and the configuration file is copied to this container (see
 [Dockerfile_server](https://github.com/pleshakoff/gossip/blob/master/Dockerfile_server),
 [Dockerfile_client](https://github.com/pleshakoff/gossip/blob/master/Dockerfile_client)). 
-В текущей реализации для всех нод используется один и тот же файл, 
-но внутри он разбит на секции, соответствующие разным профилям. Одна нода - один профиль. 
-В docker-compose.yml в параметрах запуска для каждый ноды указывается свой профиль.
+In the current implementation, the same file is used for all nodes, 
+but inside it is divided into sections corresponding to different profiles. One node - one profile. 
+In docker-compose.yml, each node has its own profile in the startup parameters.
 
-Если в конфигурационный файл вносились измнения то необходимо пересобрать контейнеры  
-Например при запуске, указав флаг `docker-compose up --build` 
+If changes were made to the configuration file, it is necessary to rebuild the containers
+For example, at startup, specifying the flag`docker-compose up --build` 
  
-Если необходимо, можно увеличить количество нод или изменить их взаимосвязи. 
-Также можно для каждой ноды сделать свой отдельный конфигурациронный файл, и свой docker файл. 
+If necessary, you can increase the number of nodes or change their relationships. 
+You can also make your own separate config file for each node, and your own docker file. 
 
 ##### Swagger 
 
-Нода #1:  http://localhost:8081/api/v1/swagger-ui.html
+Node #1: http://localhost:8081/api/v1/swagger-ui.html
 
-Нода #2:  http://localhost:8082/api/v1/swagger-ui.html
+Node #2: http://localhost:8082/api/v1/swagger-ui.html
 
-Нода #3:  http://localhost:8083/api/v1/swagger-ui.html
+Node #3: http://localhost:8083/api/v1/swagger-ui.html
 
-Нода #4:  http://localhost:8084/api/v1/swagger-ui.html
+Node #4: http://localhost:8084/api/v1/swagger-ui.html
 
-Нода #5:  http://localhost:8085/api/v1/swagger-ui.html
+Node #5: http://localhost:8085/api/v1/swagger-ui.html
 
-Клиент:  http://localhost:8080/api/v1/swagger-ui.html
+Client: http://localhost:8080/api/v1/swagger-ui.html 
 
-GET запросы можно запускать прямо в браузере. 
-Например получить состояние нод можно по ссылке: http://localhost:8080/api/v1/context
+GET requests can be run directly in the browser. 
+For example, you can get the node status by following the link: http://localhost:8080/api/v1/context 
 
-##### Pool timeout 
+##### Pool timeout
 
-Для всех нод 2 секунды. 
-Таймауты можно перенастроить в конфигурационнных файлах
+2 seconds for all nodes. 
+Timeouts can be reconfigured in configuration files
 
-##### Логи 
+##### Logs
 
 `docker-compose logs -f gossip-server-1 `
 
@@ -253,47 +251,41 @@ GET запросы можно запускать прямо в браузере.
 
 
 <a name="examples"></a>
-## Примеры
+## Examples
 
-Ниже рассмотрен ряд примеров работы с кластером  
+Below are examples of working with a cluster
 
-Все примеры нужно выполнять через swagger клиентской ноды.
-Все то же самое можно сделать, обращаясь непосредстваенно к серверным  нодам, но через клиента удобнее.   
+All examples need to be performed via swagger of the client node.
+All the same can be done by accessing directly to the server nodes, but it is more convenient via the client.   
 
-При отключении узла через API, добавление сообщений недоступно. Но операция просмотра чата и получение метаданных не блокируются.
+When disabling a node via the API, adding messages is not available. But the chat view operation and receiving metadata are not blocked.
 
-Для добавления сообщений в ноду №1 необходимо использовать 
+To add messages to node #1, use 
 
-**POST** http://localhost:8080/api/v1/chat?peerId=1  
+**POST** http://localhost:8080/api/v1/chat?peerId=1 
 
-Для получения всего чата ноды №1 
+To get the entire chat of node #1 
 
 http://localhost:8080/api/v1/chat?peerId=1
 
-Как проходит репликация можно проверить, добавляя сообщения на разные ноды и получая состав чата с разных нод. 
-Чат должен быть везде идентичен.
+You can check how replication is going by adding messages to different nodes and getting the chat composition from different nodes. 
+The chat should be identical everywhere.
 
-Можно останавливать 
+You can stop
    
 **POST** http://localhost:8080/api/v1/context/stop?peerId=1
    
-и запускать ноды 
+and launch nodes 
 
 **POST** http://localhost:8080/api/v1/context/start?peerId=1
  
-После запуска, нода должна подтянуть данные чата у соседей. 
+After launching, the node should pull up the chat data from the neighbors. 
 
-Для проверки также можно использовать метод, возвращающий данные всех нод
+For checking, you can also use a method that returns data from all nodes 
 
 http://localhost:8080/api/v1/context 
 
-Для каждой ноды он возвращает статус, список соседей и логические часы. 
-Также есть удобное поле storageSize, показывающее размер чата у каждой ноды.  
+It returns a status for each node, a list of neighbors, and logical clocks. 
+There is also a convenient storageSize field showing the chat size for each node.  
 
 
-
-
-
-  
- 
- 
