@@ -16,7 +16,7 @@ GOSSIP protocol is used for data replication.
 The implementation is written in Java+Spring Boot.
  
 The system consists of two modules for two types of nodes: client and server. 
-You can deploy an unlimited number of instances of both the server and the client.
+You can deploy an unlimited number of instances for both the server and the client.
 In the current configuration, 5 nodes and 1 client are configured. 
 The network topology is shown in the figure above. The topology is configured in the configuration file 
 (more details [configuration](#config)) 
@@ -33,7 +33,7 @@ You can work with the API via swagger (more details in [API](#api))
 
 The server node is able to add data to the chat and show all chat records. 
 
-Each server node has access to database in which data is stored. 
+Each server node has access to the database in which data is stored. 
 
 Each node has its own separate database. 
 
@@ -46,13 +46,13 @@ to support other types of storage.
 A timer has been started in the server node to start gossip interaction. 
 The pull strategy is selected in the current implementation.  
 
-Each timer node polls its neighbors for the new records. 
+Each timer node polls its neighbors for new records. 
 The concept of logical clocks is used to store the data state of each node. 
 
 The current version of the data and the versions of neighboring nodes (from the point of view of the current node) are stored 
 in a special vector. Any change in the node data leads to an increase in the version vector.
 
-If the node data changed based as a result of a pull request to a neighboring node, then the 
+If the node data changed based on the result of a pull request from a neighboring node, then the 
 data version of the neighboring node and the current node version + 1 are increased in the vector.   
        
 When requesting data, the node sends the supplier node its version of the data version of the supplier node. 
@@ -92,17 +92,17 @@ Since the sender node version in the sender vector (equal to 2) is no more than 
 Since the data can come to the node in different ways, it is still necessary to 
 provide verification in order to avoid looping.
 
-Each chat record has visited array with a list of nodes in which the record has passed. 
+Each chat record has a visited array with a list of nodes in which the record has passed. 
 If the record was already in this node, it is not inserted. 
 
-Also, each record has version field that contains the local version in the node corresponding to the 
+Also, each record has a version field that contains the local version in the node corresponding to the 
 logical clocks version at the time of insertion.
 The version is needed to pull the necessary data on request by neighboring nodes.     
  
 In order to be able to emulate node disconnections without stopping containers, it is possible to 
 stop nodes via the API. After the node is stopped, it is silent and not available for other nodes and for recording by the client.  
 But it is possible to get the chat contents, which is convenient for studying the cluster behavior 
-in a extraordinary situation. 
+in an extraordinary situation. 
 
       
 <a name="api"></a>            
@@ -155,7 +155,7 @@ It can collect metadata from the entire cluster and show the available nodes and
 Reading and recording can be done in any node.  
 The client does not know which node to call in the current implementation, 
 it must be specified in the request parameter. It is done intentionally 
-for easy investigating the behavior of different nodes.
+for easy investigation of the behavior of different nodes.
 
 A record is added to the database of the selected node during recording. 
 After that, the data is gradually synchronized in all other nodes
@@ -179,7 +179,7 @@ Packages
 * [exchange](https://github.com/pleshakoff/gossip/tree/master/client/src/main/java/com/gossip/client/exchange). 
 Service for obtaining metadata of server nodes
 
-Everything else is just redirects to endpoints of server nodes for reading and recording data.  
+Everything else just redirects to endpoints of server nodes for reading and recording data.  
 
     
 
@@ -256,7 +256,7 @@ Timeouts can be reconfigured in configuration files
 Below are examples of working with a cluster
 
 All examples need to be performed via swagger of the client node.
-All the same can be done by accessing directly to the server nodes, but it is more convenient via the client.   
+The same can be done by accessing directly to the server nodes, but it is more convenient via the client.   
 
 When disabling a node via the API, adding messages is not available. But the chat view operation and receiving metadata are not blocked.
 
@@ -286,6 +286,6 @@ For checking, you can also use a method that returns data from all nodes
 http://localhost:8080/api/v1/context 
 
 It returns a status for each node, a list of neighbors, and logical clocks. 
-There is also a convenient storageSize field showing the chat size for each node.  
+There is also a convenient storage Size field showing the chat size for each node.  
 
 
